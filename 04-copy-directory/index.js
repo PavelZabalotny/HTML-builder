@@ -4,7 +4,7 @@ const fs = require('fs');
 const pathDest = path.join(__dirname, 'files-copy');
 const pathSrc = path.join(__dirname, 'files');
 
-function readFolder(folder) {
+function readFolder(pathSrc, pathDest) {
   fs.promises.readdir(pathDest, { withFileTypes: true })
     .then((files) => {
       files.forEach((file) => {
@@ -19,7 +19,7 @@ function readFolder(folder) {
       });
     })
     .then(() => {
-      fs.promises.readdir(folder, { withFileTypes: true }).then((files) => {
+      fs.promises.readdir(pathSrc, { withFileTypes: true }).then((files) => {
         files.forEach(file => {
           if (file.isFile()) {
             fs.copyFile(path.join(pathSrc, file.name), path.join(pathDest, file.name), (err) => {
@@ -41,5 +41,5 @@ fs.mkdir(pathDest, { recursive: true }, (err) => {
   if (err) {
     throw err;
   }
-  readFolder(pathSrc);
+  readFolder(pathSrc, pathDest);
 });
