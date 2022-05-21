@@ -1,13 +1,18 @@
 const readline = require('readline');
 const fs = require('fs');
+const path = require('path');
+
+const pathDest = path.join(__dirname, 'file.txt');
 
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
-  prompt: 'Hello, what are your name: ',
+  prompt: 'Type some text: ',
 });
 
-const writeStream = fs.createWriteStream('file.txt');
+rl.prompt();
+
+const writeStream = fs.createWriteStream(pathDest);
 
 rl.on('line', (line) => {
   if (line === 'exit') {
