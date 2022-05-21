@@ -26,11 +26,16 @@ async function readDir(pathSrc, pathDest) {
     } else if (dirent.isFile()) {
       const fileSrc = path.join(pathSrc, dirent.name);
       const fileDest = path.join(pathDest, dirent.name);
-      fs.promises.mkdir(pathDest, { recursive: true })
+      fs.promises
+        .mkdir(pathDest, { recursive: true })
         .then(() => {
-          fs.promises.copyFile(fileSrc, fileDest).then(() => {
-            console.log(`${dirent.name} is copy from ${fileSrc} to ${fileDest}`);
-          })
+          fs.promises
+            .copyFile(fileSrc, fileDest)
+            .then(() => {
+              console.log(
+                `${dirent.name} is copy from ${fileSrc} to ${fileDest}`
+              );
+            })
             .catch(error);
         })
         .catch(error);
@@ -42,9 +47,10 @@ async function main() {
   const templateData = await fs.promises.readFile(pathTemplate);
   /**
    * read all file in components path
-   * @type {Dirent[]}
    */
-  const dirents = await fs.promises.readdir(pathComponents, { withFileTypes: true });
+  const dirents = await fs.promises.readdir(pathComponents, {
+    withFileTypes: true,
+  });
   const files = dirents.map(({ name }) => name.split('.')[0]);
   /**
    * create array of objects like {pending Promise(file: footer, payload: html layout)}
@@ -52,11 +58,13 @@ async function main() {
   let templateString = templateData.toString();
   const newFiles = files.map(async (file) => ({
     file,
-    payload: await fs.promises.readFile(path.join(pathComponents, `${file}.html`), { encoding: 'utf-8' })
+    payload: await fs.promises.readFile(
+      path.join(pathComponents, `${file}.html`),
+      { encoding: 'utf-8' }
+    ),
   }));
   /**
    * replace all Promise to object
-   * @type {Awaited<{file: *, payload: Buffer}>[]}
    */
   const objectForReplace = await (async () => {
     return Promise.all(newFiles);
@@ -67,7 +75,9 @@ async function main() {
    */
   objectForReplace.forEach(({ file, payload }) => {
     const pattern = `{{${file}}}`;
-    arrTemp.push(arrTemp.shift().replace(new RegExp(pattern, 'g'), payload.toString()));
+    arrTemp.push(
+      arrTemp.shift().replace(new RegExp(pattern, 'g'), payload.toString())
+    );
   });
   const newTemplate = arrTemp[0];
   /**
@@ -79,17 +89,21 @@ async function main() {
     /**
      * write modified template.html to project-dist folder
      */
-    fs.writeFile(path.join(pathProject, 'template.html'), newTemplate, (err) => {
-      if (err) throw err.message;
-      /**
-       * create styles.css in project-dist folder
-       */
-      bundle();
-      /**
-       * copy assets in project-dist folder
-       */
-      readDir(pathSrc, pathDest);
-    });
+    fs.writeFile(
+      path.join(pathProject, 'template.html'),
+      newTemplate,
+      (err) => {
+        if (err) throw err.message;
+        /**
+         * create styles.css in project-dist folder
+         */
+        bundle();
+        /**
+         * copy assets in project-dist folder
+         */
+        readDir(pathSrc, pathDest);
+      }
+    );
   });
 }
 
@@ -97,7 +111,7 @@ async function bundle() {
   const files = await fs.promises.readdir(pathStyle, { withFileTypes: true });
   const writeStream = fs.createWriteStream(pathStyleDest);
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const fileExt = path.parse(file.name).ext;
 
     if (file.isFile() && fileExt === '.css') {
@@ -106,6 +120,12 @@ async function bundle() {
 
       readStream.on('data', (chunk) => {
         writeStream.write(chunk);
+      });
+
+      // add \n to the end of file
+      readStream.on('end', () => {
+        fs.appendFile(pathFile, '\n', () => {
+        });
       });
 
       console.log(`${file.name} - is wrote on ${pathStyleDest}!`);
