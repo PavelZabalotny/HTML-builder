@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 
-const pathToFolder = path.join(path.resolve(), 'secret-folder');
+const pathToFolder = path.join(__dirname, 'secret-folder');
 
 async function readFolder(folder) {
   try {
@@ -17,7 +17,7 @@ async function readFolder(folder) {
             console.log(error);
             throw new Error(error.message);
           } else {
-            console.log(`${fileName} - ${fileExt} - ${stats.size} byte`);
+            console.log(`${fileName} - ${fileExt} - ${stats.size}b`);
           }
         });
       }
